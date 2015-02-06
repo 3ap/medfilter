@@ -28,15 +28,10 @@ void filter(uint32_t wndsz, FILE* in, FILE* out) {
 	int32_t* sigbuf;
 	int32_t* wndbuf;
 
-/*	wndbuf = (int32_t*)mmap(NULL, sizeof(int32_t) * wndsz, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	if (wndbuf == MAP_FAILED) { 
-		perror("Decrease window");
-		exit(EXIT_FAILURE);	
-	}
-*/
-	// TODO: calloc killed
+	fprintf(stderr, "Allocating memory for window buffer (%"SCNu32" * sizeof(int32_t) bytes)...\n", wndsz);
 	wndbuf = (int32_t*)calloc(sizeof(int32_t), wndsz);
 	size_t sigbufsz = (wndsz > MAX_BUFFER ? wndsz+halfwndsz : MAX_BUFFER);
+	fprintf(stderr, "Allocating memory for signal buffer (%"SCNu32" * sizeof(int32_t) bytes)...\n", wndsz);
 	sigbuf = (int32_t*)calloc(sizeof(int32_t), sigbufsz);
 
 	/*
@@ -56,7 +51,6 @@ void filter(uint32_t wndsz, FILE* in, FILE* out) {
 	/* iterators */
 	int32_t* i;
 	int32_t* j;
-	int32_t cc = 0;
 
 	/* median of window */
 	int32_t m;
@@ -101,11 +95,13 @@ void filter(uint32_t wndsz, FILE* in, FILE* out) {
 				fprintf(stderr,"}, median: %"SCNi32"\n", m);
 			#endif
 			fwrite(&m, sizeof(int32_t), 1, out);
-		} 
-		c = 0;
-		for(i = last_sigel - halfwndsz + 1; i != last_sigel + 1; i++) {
-			sigbuf[c++] = *i;
 		}
+
+		/* filling beginning of sigbuf by last N elements of signal, where N = halfwnd */
+		c = 0;
+		for(i = last_sigel - halfwndsz + 1; i != last_sigel + 1; i++)
+			sigbuf[c++] = *i;
+		
 		#ifdef DEBUG
 			fprintf(stderr, "sigbuf out = {");
 			for(l1 = 0; l1 < sigbufsz; l1++)
