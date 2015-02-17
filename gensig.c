@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
 	const int32_t base = 300;
 	int32_t member;
-	for(n; n != 0; n--) {
+	for(; n != 0; n--) {
 		member = rand()%5; // 25% of noise
 		if(member == 0) member = rand()%100;
 		member += base;

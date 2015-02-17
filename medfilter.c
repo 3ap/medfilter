@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 	uint32_t wndsz;
 	sscanf(argv[1], "%"SCNu32, &wndsz);
 	if(wndsz % 2 == 0 || wndsz == 0) {
-		perror("Window must be odd and positive");
+		fprintf(stderr, "Window must be odd and positive\n");
 		exit(2);
 	}
 
@@ -57,9 +57,9 @@ void filter(uint32_t wndsz, FILE* in, FILE* out) {
 
 	/* fill ``prev halfwnd'' by first element of signal at first iteration */
 	char first_iteration = 0;
-	while(n = fread(first_sigel, sizeof(int32_t), sigbufsz-halfwndsz, in)) {
+	while((n = fread(first_sigel, sizeof(int32_t), sigbufsz-halfwndsz, in)) > 0) {
 		if(n < wndsz && !first_iteration) {
-			fprintf(stderr, "Window size more than input length (%"SCNu32" > %d)\n", wndsz, n);
+			fprintf(stderr, "Window size more than input length (%"SCNu32" > %zu)\n", wndsz, n);
 			exit(2);
 		}
 		#ifdef DEBUG
